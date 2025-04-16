@@ -26,6 +26,8 @@ const ActionButtonsComponent: React.FC<ActionButtonsProps> = ({
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [audioPrice, setAudioPrice] = useState("");
   const [videoPrice, setVideoPrice] = useState("");
+  const [displayAudioPrice,setDisplayAudioPrice]=useState("");
+  const [displayVideoPrice,setDisplayVideoPrice]=useState("");
 
   // -------------------------------------------------------
   // States for Set KYC Notification Modal
@@ -170,7 +172,7 @@ const ActionButtonsComponent: React.FC<ActionButtonsProps> = ({
   // Submit Updated Prices -> POST to /update
   // -------------------------------------------------------
   const handleSubmitUpdatedPrices = async () => {
-    if (!audioPrice || !videoPrice) {
+    if (!audioPrice || !videoPrice || !displayAudioPrice || !displayVideoPrice) {
       return Swal.fire(
         "Missing Data!",
         "Please provide both audio and video call prices.",
@@ -187,6 +189,8 @@ const ActionButtonsComponent: React.FC<ActionButtonsProps> = ({
           body: JSON.stringify({
             audioPrice,
             videoPrice,
+            displayAudioPrice,
+            displayVideoPrice
           }),
         }
       );
@@ -198,6 +202,8 @@ const ActionButtonsComponent: React.FC<ActionButtonsProps> = ({
         setShowUpdateModal(false);
         setAudioPrice("");
         setVideoPrice("");
+        setDisplayAudioPrice("");
+        setDisplayVideoPrice("");
       } else {
         Swal.fire("Error!", data.message || "Failed to update astrologer.", "error");
       }
@@ -456,6 +462,30 @@ const ActionButtonsComponent: React.FC<ActionButtonsProps> = ({
                 value={videoPrice}
                 onChange={(e) => setVideoPrice(e.target.value)}
                 placeholder="Enter video call price"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-yellow-200"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+               Display Audio Call Price
+              </label>
+              <input
+                type="number"
+                value={displayAudioPrice}
+                onChange={(e) => setDisplayAudioPrice(e.target.value)}
+                placeholder="Enter Display Audio Call Price"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-yellow-200"
+              />
+            </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Display Video Call Price
+              </label>
+              <input
+                type="number"
+                value={displayVideoPrice}
+                onChange={(e) => setDisplayVideoPrice(e.target.value)}
+                placeholder="Enter Display Video Call Price"
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-yellow-200"
               />
             </div>
