@@ -1,6 +1,8 @@
 import Cookies from "universal-cookie";
+import imageCompression from 'browser-image-compression';
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 const GOOGLE_OAUTH_API_URL=process.env.NEXT_PUBLIC_GOOGLE_OAUTH_API_URL
+
 export const buildQuery = (obj) => {
     return new URLSearchParams(obj).toString();
 }

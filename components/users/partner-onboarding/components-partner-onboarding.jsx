@@ -28,6 +28,7 @@ const ComponentPartnerOnboarding = () => {
         if(formData.get('avatar')){
             let currentAvatar=formData.get('avatar');
             let compressedAvatar=await compressImage(currentAvatar);
+            console.log('Size for compressedAvatar',compressedAvatar.size/1024/1024);
             formData.set('avatar',compressedAvatar);
         }
     

@@ -1,6 +1,6 @@
 'use client';
 import IconX from '@/components/icon/icon-x';
-import { getUserInterests, userOnboardingApi } from '@/utils';
+import { compressImage, getUserInterests, userOnboardingApi } from '@/utils';
 import { Dialog, Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -81,7 +81,13 @@ const ComponentUpdateNormalUser = ({ userData ,appPassword}) => {
 
             if (formData.get('sample').name === '') formData.delete('sample')
             if (formData.get('avatar').name === '') formData.delete('avatar')
-
+            
+            if(formData.get('avatar')){
+                let currentAvatar=formData.get('avatar');
+                let compressedAvatar=await compressImage(currentAvatar);
+                console.log('Size for compressedAvatar',compressedAvatar.size/1024/1024);
+                formData.set('avatar',compressedAvatar);
+            }
             formData.append('password', "Sarthak1singhal@");
             const apiData = await userOnboardingApi('/user/api/admin/update-people', formData, cookies.get('access_token'))
 

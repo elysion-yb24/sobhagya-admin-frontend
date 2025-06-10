@@ -27,6 +27,7 @@
         "@x1mrdonut1x/nouislider-react": "^3.4.3",
         "apexcharts": "^4.5.0",
         "axios": "^1.8.1",
+        "browser-image-compression": "^2.0.2",
         "date-fns": "^4.1.0",
         "easymde": "^2.18.0",
         "eslint": "8.32.0",
