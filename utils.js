@@ -389,3 +389,20 @@ export const get=async(endpoint,access_token)=>{
         return { data: null, success: false, message: 'Internal Server Error' }
     }
 }
+
+export const compressImage=async(file)=>{
+    const options= { 
+        maxSizeMB: 0.5,
+        useWebWorker: true,        // optional, use multi-thread web worker, fallback to run in main-thread (default: true)
+        preserveExif: true,         // optional, use preserve Exif metadata for JPEG image e.g., Camera model, Focal length, etc (default: false)
+        fileType: 'image/jpeg',     // optional, fileType override e.g., 'image/jpeg', 'image/png' (default: file.type)
+        // alwaysKeepResolution: true  // optional, only reduce quality, always keep width and height (default: false)
+      }
+    try{
+        let result=await imageCompression(file,options);
+        return result;
+    }catch(err){
+        console.error('Err in compressing image',err.message);
+        return null;
+    }
+}

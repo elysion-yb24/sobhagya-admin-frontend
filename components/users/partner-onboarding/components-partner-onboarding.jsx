@@ -7,6 +7,7 @@ import Asyncselect from 'react-select/async'
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import Cookies from 'universal-cookie';
+import {compressImage} from "@/utils"
 
 const ComponentPartnerOnboarding = () => {
     const cookies = new Cookies(null, { path: '/' });
@@ -24,7 +25,12 @@ const ComponentPartnerOnboarding = () => {
         const formData = new FormData(e.target)
         if (formData.get('isVideoCallAllowed') === 'on') formData.set('isVideoCallAllowed', true)
         if (formData.get('isVideoCallAllowedAdmin') === 'on') formData.set('isVideoCallAllowedAdmin', true)
-
+        if(formData.get('avatar')){
+            let currentAvatar=formData.get('avatar');
+            let compressedAvatar=await compressImage(currentAvatar);
+            formData.set('avatar',compressedAvatar);
+        }
+    
         formData.append('password', "Sarthak1singhal@");
         setDisableSubmit(true);
         const apiData = await userOnboardingApi('/auth/api/team/add-people', formData, cookies.get('access_token'))
