@@ -24,6 +24,11 @@ function ComponentPartnerAnalytics({ analyticsData, errorMessage }) {
     // const PAGE_SIZES = [10, 20, 30, 50, 100];
     // const [pageSize, setPageSize] = useState(PAGE_SIZES[0]);
     // const [recordsData, setRecordsData] = useState(initialRecords);
+    function convertToIST(utcString) {
+        const utcDate = new Date(utcString);
+        if (isNaN(utcDate.getTime()) || utcDate.getFullYear() === 1970) return 'N/A';
+        return utcDate.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    }
     const MySwal = withReactContent(Swal);
     const cookies = new Cookies(null, { path: '/' })
     const [partnerCategory, setPartnerCategory] = useState({
@@ -149,7 +154,6 @@ function ComponentPartnerAnalytics({ analyticsData, errorMessage }) {
         setInitialRecords(sortStatus.direction === 'desc' ? data.sort(function (a, b) { return b[sortStatus.columnAccessor] - a[sortStatus.columnAccessor] }) : data.sort(function (a, b) { return a[sortStatus.columnAccessor] - b[sortStatus.columnAccessor] }));
     }, [sortStatus]);
 
-    console.log('rendering');
     return (
         <>
             {/* Search Queries */}
@@ -290,11 +294,11 @@ function ComponentPartnerAnalytics({ analyticsData, errorMessage }) {
                                     // highlightOnHover
                                     className=" whitespace-nowrap"
                                     records={initialRecords}
-                                    rowClassName={({ receiverId,paidCallsCount, missedCallsCount, missedCallsPercent, freeCallsCount, conversionPercent }) => {
-                                        if(partnerCategory.partnerId===receiverId) return '!bg-gray-200';
-                                        if (paidCallsCount === 0 && missedCallsCount === 0 && freeCallsCount === 0) return ''
-                                        if (freeCallsCount === 0) return ''
-                                        if (missedCallsPercent > 30 || conversionPercent < 10) return '!bg-[#ffa8a8]' 
+                                    rowClassName={({ partnerId,totalPaidCalls, totalMissedCalls, missedCallsPercent, totalFreeCalls, conversionPercent }) => {
+                                        // if(partnerCategory.partnerId===receiverId) return '!bg-gray-200';
+                                        // if (totalPaidCalls === 0 && totalMissedCalls === 0 && totalFreeCalls === 0) return ''
+                                        // if (totalFreeCalls === 0) return ''
+                                        // if (missedCallsPercent > 30 || conversionPercent < 10) return '!bg-[#ffa8a8]' 
                                         return '';
                                     }}
                                     // onRowClick={({ receiverId, category, receiverName }) => {
@@ -306,14 +310,14 @@ function ComponentPartnerAnalytics({ analyticsData, errorMessage }) {
                                             {
                                                 accessor: '_id',
                                                 title: 'User Id',
-                                                render: ({ receiverId }) => <div className="text-info">{receiverId}</div>,
+                                                render: ({ partnerId }) => <div className="text-info">{partnerId}</div>,
                                             },
                                             {
                                                 accessor: 'name',
                                                 title: 'Name',
-                                                render: ({ receiverName }) => (
+                                                render: ({ name }) => (
                                                     <div className="flex items-center gap-2">
-                                                        <div className="font-bold">{receiverName}</div>
+                                                        <div className="font-bold">{name}</div>
                                                     </div>
                                                 ),
                                             },
@@ -326,44 +330,59 @@ function ComponentPartnerAnalytics({ analyticsData, errorMessage }) {
                                                     </div>
                                             },
                                             {
-                                                accessor: 'missedCallsCount',
+                                                accessor: 'totalMissedCalls',
                                                 title: 'Missed Calls',
                                                 sortable: true,
-                                                render: ({ missedCallsCount }) => <div className="flex items-center gap-2">
-                                                    <strong className="font-bold">{missedCallsCount}</strong>
+                                                render: ({ totalMissedCalls }) => <div className="flex items-center gap-2">
+                                                    <strong className="font-bold">{totalMissedCalls}</strong>
                                                 </div>,
                                             },
                                             {
-                                                accessor: 'freeCallsCount',
+                                                accessor: 'totalFreeCalls',
                                                 title: 'Free Calls Count',
                                                 sortable: true,
-                                                render: ({ freeCallsCount }) => <div className="flex items-center justify-center">
-                                                    <span className={`font-bold p-2`}>{freeCallsCount}</span>
+                                                render: ({ totalFreeCalls }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalFreeCalls}</span>
                                                 </div>
                                             },
                                             {
-                                                accessor: 'paidCallsCount',
+                                                accessor: 'totalPaidCalls',
                                                 title: 'Paid Calls Count',
                                                 sortable: true,
-                                                render: ({ paidCallsCount }) => <div className="flex items-center justify-center">
-                                                    <span className={`font-bold p-2`}>{paidCallsCount}</span>
-                                                </div>
-                                            },
-
-                                            {
-                                                accessor: 'medianFreeDuration',
-                                                title: 'Median Free Duration',
-                                                sortable: true,
-                                                render: ({ medianFreeDuration }) => <div className="flex items-center justify-center">
-                                                    <span className={`font-bold p-2`}>{medianFreeDuration} {'secs'}</span>
+                                                render: ({ totalPaidCalls }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalPaidCalls}</span>
                                                 </div>
                                             },
                                             {
-                                                accessor: 'medianPaidDuration',
-                                                title: 'Median Paid Duration',
+                                                accessor: 'totalVideoCalls',
+                                                title:  'Video Calls Count',
                                                 sortable: true,
-                                                render: ({ medianPaidDuration }) => <div className="flex items-center justify-center">
-                                                    <span className={`font-bold p-2`}>{medianPaidDuration} secs</span>
+                                                render: ({ totalVideoCalls }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalVideoCalls}</span>
+                                                </div>
+                                            },
+                                            {
+                                                accessor: 'totalFreeCallsDuration',
+                                                title: 'Total Free Call Duration',
+                                                sortable: true,
+                                                render: ({ totalFreeCallsDuration }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalFreeCallsDuration} {'secs'}</span>
+                                                </div>
+                                            },
+                                            {
+                                                accessor: 'totalPaidCallsDuration',
+                                                title: 'Total Paid Call Duration',
+                                                sortable: true,
+                                                render: ({ totalPaidCallsDuration }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalPaidCallsDuration} secs</span>
+                                                </div>
+                                            },
+                                            {
+                                                accessor: 'totalVideoDuration',
+                                                title: 'Total Video Duration',
+                                                sortable: true,
+                                                render: ({ totalVideoDuration }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalVideoDuration} {'secs'}</span>
                                                 </div>
                                             },
                                             {
@@ -372,7 +391,7 @@ function ComponentPartnerAnalytics({ analyticsData, errorMessage }) {
                                                 sortable: true,
                                                 render: ({ avgRating }) => {
                                                     return <div className="flex items-center justify-center">
-                                                        <span className={`font-bold p-2`}>{avgRating.toFixed(2)}</span>
+                                                        <span className={`font-bold p-2`}>{avgRating?.toFixed(2)}</span>
                                                     </div>
                                                 }
                                             },
@@ -387,13 +406,23 @@ function ComponentPartnerAnalytics({ analyticsData, errorMessage }) {
                                                 }
                                             },
                                             {
+                                                accessor: 'convertedLeadSelf',
+                                                title: 'Converted Leads Self',
+                                                sortable: true,
+                                                render: ({ convertedLeadSelf }) => {
+                                                    return <div className="flex items-center justify-center">
+                                                        <span className={`font-bold p-2`}>{convertedLeadSelf}</span>
+                                                    </div>
+                                                }
+                                            },
+                                            {
                                                 accessor: 'conversionPercent',
                                                 title: 'Conversion',
                                                 sortable: true,
                                                 render: ({ conversionPercent }) => {
                                                     return <div className="flex items-center justify-center">
-                                                        <span className={`font-bold p-2`}>{conversionPercent < 0 ? 'N/A' : (conversionPercent + '%')}</span>
-
+                                                        {/* <span className={`font-bold p-2`}>{totalCalls  ?  ((convertedLeads + convertedLeadSelf) / totalCalls * 100).toFixed(2) : 0}</span> */}
+                                                        <span className={`font-bold p-2`}>{ conversionPercent}</span>
                                                     </div>
                                                 }
                                             },
@@ -401,56 +430,118 @@ function ComponentPartnerAnalytics({ analyticsData, errorMessage }) {
                                                 accessor: 'missedCallsPercent',
                                                 title: 'Missed Calls percent',
                                                 sortable: true,
-                                                render: ({ missedCallsPercent }) => {
+                                                render: ({ missedCallsPercent}) => {
                                                     return <div className="flex items-center justify-center">
-                                                        <span className={`font-bold p-2`}>{missedCallsPercent}%</span>
+                                                        <span className={`font-bold p-2`}>{missedCallsPercent}</span>
 
                                                     </div>
                                                 }
                                             },
+                                            // {
+                                            //     accessor: 'totalReviews',
+                                            //     title: 'Total Review',
+                                            //     sortable: true,
+                                            //     render: ({ totalReviews, receiverId, receiverName }) => {
+                                            //         return <div className="flex items-center justify-center text-info text-underline cursor-pointer">
+                                            //             <span className={`font-bold p-2`} onClick={() => setPartnerCategory({ ...partnerCategory, partnerId: receiverId, partnerName: receiverName, isModal: false })}>{totalReviews}</span>
+                                            //         </div>
+                                            //     }
+                                            // },
                                             {
-                                                accessor: 'totalReviews',
-                                                title: 'Total Review',
-                                                sortable: true,
-                                                render: ({ totalReviews, receiverId, receiverName }) => {
-                                                    return <div className="flex items-center justify-center text-info text-underline cursor-pointer">
-                                                        <span className={`font-bold p-2`} onClick={() => setPartnerCategory({ ...partnerCategory, partnerId: receiverId, partnerName: receiverName, isModal: false })}>{totalReviews}</span>
-                                                    </div>
-                                                }
-                                            },
-                                            {
-                                                accessor: 'gifts',
+                                                accessor: 'totalGifts',
                                                 title: 'Gifts',
                                                 sortable: true,
-                                                render: ({ gifts }) => {
+                                                render: ({ totalGifts,giftAmounts }) =>{
+                                                    return (<div className="flex items-center justify-center">
+                                                        <span className={`font-bold p-2`}>{totalGifts}</span>
+                                                    </div>)
+                                                }
+                                            },
+                                            {
+                                                accessor: 'totalCallRevenueGenerated',
+                                                title: 'Voice Call Revenue Generated',
+                                                sortable: true,
+                                                render: ({ totalCallRevenueGenerated }) => {
                                                     return <div className="flex items-center justify-center">
-                                                        <span className={`font-bold p-2`}>{gifts}</span>
+                                                        <span className={`font-bold p-2`}>{totalCallRevenueGenerated?.toFixed(2)}</span>
                                                     </div>
                                                 }
                                             },
                                             {
-                                                accessor: 'earnings',
-                                                title: 'Earnings',
+                                                accessor: 'totalCallEarnings',
+                                                title: 'Voice Call Earnings',
                                                 sortable: true,
-                                                render: ({ earnings }) => {
+                                                render: ({ totalCallEarnings }) => {
                                                     return <div className="flex items-center justify-center">
-                                                        <span className={`font-bold p-2`}>{earnings?.toFixed(2)}</span>
+                                                        <span className={`font-bold p-2`}>{totalCallEarnings?.toFixed(2)}</span>
                                                     </div>
                                                 }
                                             },
                                             {
-                                                accessor: 'category',
-                                                title: 'Category',
+                                                accessor: 'totalVideoRevenueGenerated',
+                                                title: 'Video Revenue Generated',
                                                 sortable: true,
-                                                render: ({ receiverId, category, receiverName }) => {
-                                                    return <div className="flex items-center justify-center cursor-pointer text-info" onClick={() => {
-                                                        setModal1(true);
-                                                        setPartnerCategory({ ...partnerCategory, currentCategory: category, partnerId: receiverId, partnerName: receiverName, isModal: true })
-                                                    }}>
-                                                        <span className={`font-bold p-2`}>{category || 'none'}</span>
+                                                render: ({ totalVideoRevenueGenerated }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalVideoRevenueGenerated?.toFixed(2)}</span>
+                                                </div>
+                                            },
+                                            {
+                                                accessor: 'totalVideoEarnings',
+                                                title: 'Video Earnings',
+                                                sortable: true,
+                                                render: ({ totalVideoEarnings }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalVideoEarnings?.toFixed(2)}</span>
+                                                </div>
+                                            },
+                                            {
+                                                accessor: 'totalRevenueGenerated',
+                                                title: 'Total Revenue ',
+                                                sortable: true,
+                                                render: ({totalRevenueGenerated }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalRevenueGenerated}</span>
+                                                </div>
+                                            },
+                                            {
+                                                accessor: 'totalEarnings',
+                                                title: 'Total Earnings',
+                                                sortable: true,
+                                                render: ({totalEarnings }) => <div className="flex items-center justify-center">
+                                                    <span className={`font-bold p-2`}>{totalEarnings}</span>
+                                                </div>
+                                            },
+                                            {
+                                                accessor: 'createdAt',
+                                                title: 'Created At',
+                                                sortable: true,
+                                                render: ({ createdAt }) => {
+                                                    return <div className="flex items-center justify-center">
+                                                        <span className={`font-bold p-2`}>{convertToIST(createdAt)}</span>
                                                     </div>
                                                 }
+                                            },
+                                            {
+                                                accessor: 'lastActive',
+                                                title: 'Last Active',
+                                                sortable: true,
+                                                render: ({ lastActive }) => {
+                                                    return <div className="flex items-center justify-center">
+                                                        <span className={`font-bold p-2`}>{convertToIST(lastActive)}</span>
+                                                    </div>
+                                                } 
                                             }
+                                            // {
+                                            //     accessor: 'category',
+                                            //     title: 'Category',
+                                            //     sortable: true,
+                                            //     render: ({ receiverId, category, receiverName }) => {
+                                            //         return <div className="flex items-center justify-center cursor-pointer text-info" onClick={() => {
+                                            //             setModal1(true);
+                                            //             setPartnerCategory({ ...partnerCategory, currentCategory: category, partnerId: receiverId, partnerName: receiverName, isModal: true })
+                                            //         }}>
+                                            //             <span className={`font-bold p-2`}>{category || 'none'}</span>
+                                            //         </div>
+                                            //     }
+                                            // }
                                         ]
                                     }
                                     idAccessor='_id'
@@ -461,7 +552,90 @@ function ComponentPartnerAnalytics({ analyticsData, errorMessage }) {
                                     emptyState={errorMessage ? <div>{errorMessage}</div> : <div>No records Found</div>}
                                 />
                             )}
+
+
+                            
                         </div>
+                        
+                        {initialRecords &&
+                            <div className='p-2 flex'>
+                                <div>
+                                    <span className="text-xl font-bold">Total Missed Calls :</span>
+                                    <span className='text-lg'>
+                                        {
+                                            initialRecords.reduce((missedCalls,currentRecord)=>{
+                                                return missedCalls + Number(currentRecord.totalMissedCalls)
+                                            },0)
+                                        }
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-xl font-bold">Total Paid Calls :</span>
+                                    <span className='text-lg'>
+                                        {
+                                            initialRecords.reduce((paidCalls,currentRecord)=>{
+                                                return paidCalls + Number(currentRecord.totalPaidCalls)
+                                            },0)
+                                        }
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-xl font-bold">Total Free Calls :</span>
+                                    <span className='text-lg'>
+                                        {
+                                            initialRecords.reduce((freeCalls,currentRecord)=>{
+                                                return freeCalls + Number(currentRecord.totalFreeCalls)
+                                            },0)
+                                        }
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-xl font-bold">Total Calls :</span>
+                                    <span className='text-lg'>
+                                        {
+                                            initialRecords.reduce((totalCalls,currentRecord)=>{
+                                                return totalCalls + Number(currentRecord.totalMissedCalls+currentRecord.totalFreeCalls+currentRecord.totalPaidCalls)
+                                            },0)
+                                        }
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-xl font-bold">Total Gifts :</span>
+                                    <span className='text-lg'>
+                                        {
+                                            initialRecords.reduce((totalGifts,currentRecord)=>{
+                                                return totalGifts + Number(currentRecord.totalGifts)
+                                            },0)
+                                        }
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-xl font-bold">Total Revenue Generated :</span>
+                                    <span className='text-lg'>
+                                        {
+                                            initialRecords.reduce((revenueSum,currentRecord)=>{
+                                                return revenueSum + Number(currentRecord.totalRevenueGenerated)
+                                            },0).toFixed(2)
+                                        }
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <span className="text-xl font-bold">Partner Earnings :</span>
+                                    <span className='text-lg'>
+                                        {
+                                            initialRecords.reduce((earningsSum,currentRecord)=>{
+                                                return earningsSum + Number(currentRecord.totalEarnings)
+                                            },0).toFixed(2)
+                                        }
+                                    </span>
+                                </div>
+
+                                
+
+                                
+                            </div>
+                        }
 
                         {/* For pagination */}
                         <ul className="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mt-4">
